@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pagos Aldeamo 🐒</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f2f5;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      max-width: 480px;
+      margin: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 12px;
+      border: none;
+      width: 100%;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #success-message {
+      display: none;
+      margin-top: 20px;
+      color: green;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Pagos Aldeamo 🐒</h2>
+    <form id="payment-form">
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" readonly />
+
+      <label for="amount">Monto a pagar:</label>
+      <input type="number" id="amount" readonly />
+
+      <label for="payment-method">Método de pago:</label>
+      <select id="payment-method" required>
+        <option value="" disabled selected>Selecciona una opción</option>
+        <option value="Tarjeta de crédito">💳 Tarjeta de crédito</option>
+        <option value="Nequi">📱 Nequi</option>
+        <option value="Bancolombia">🏦 Bancolombia</option>
+        <option value="PSE">🌐 PSE</option>
+        <option value="Efecty">📮 Efecty</option>
+      </select>
+
+      <button type="submit">Pagar ahora</button>
+    </form>
+    <div id="success-message"></div>
+  </div>
+
+  <script>
+    // Obtener parámetros de la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Precargar campos si vienen en la URL
+    window.onload = function () {
+      const cliente = getQueryParam("cliente");
+      const monto = getQueryParam("monto");
+
+      if (cliente) document.getElementById("name").value = decodeURIComponent(cliente);
+      if (monto) document.getElementById("amount").value = monto;
+    };
+
+    // Simulación del pago
+    document.getElementById("payment-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const amount = document.getElementById("amount").value;
+      const method = document.getElementById("payment-method").value;
+
+      if (!name || !amount || !method) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+
+      setTimeout(() => {
+        const message = `✅ ¡Pago simulado con éxito!\n\nGracias ${name}, tu pago de $${amount} usando ${method} fue recibido.`;
+        const msgBox = document.getElementById("success-message");
+        msgBox.textContent = message;
+        msgBox.style.display = "block";
+      }, 700);
+    });
+  </script>
+</body>
+</html>
