@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pagos Aldeamo 🐒</title>
   <style>
     body {
@@ -10,15 +11,18 @@
       padding: 20px;
       background: #f0f2f5;
     }
+
     .card {
       background: white;
       border-radius: 10px;
       padding: 25px;
       max-width: 480px;
       margin: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    input, select {
+
+    input,
+    select {
       width: 100%;
       margin: 10px 0;
       padding: 12px;
@@ -26,6 +30,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
     }
+
     button {
       background-color: #28a745;
       color: white;
@@ -37,6 +42,7 @@
       cursor: pointer;
       margin-top: 10px;
     }
+
     #success-message {
       display: none;
       margin-top: 20px;
@@ -46,6 +52,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="card">
     <h2>Pagos Aldeamo 🐒</h2>
@@ -82,6 +89,7 @@
     window.onload = function () {
       const cliente = getQueryParam("cliente");
       const monto = getQueryParam("monto");
+      const origen = getQueryParam("origen");
 
       if (cliente) document.getElementById("name").value = decodeURIComponent(cliente);
       if (monto) document.getElementById("amount").value = monto;
@@ -100,13 +108,17 @@
         return;
       }
 
+      const message = `✅ ¡Pago aplicado con éxito!\n\nGracias ${name}, tu pago de $${amount} usando ${method} fue recibido.`;
+      const msgBox = document.getElementById("success-message");
+      msgBox.textContent = message;
+      msgBox.style.display = "block";
+
       setTimeout(() => {
-        const message = `✅ ¡Pago simulado con éxito!\n\nGracias ${name}, tu pago de $${amount} usando ${method} fue recibido.`;
-        const msgBox = document.getElementById("success-message");
-        msgBox.textContent = message;
-        msgBox.style.display = "block";
-      }, 700);
+        const whatsappUrl = `https://wa.me/${origen}`;
+        window.location.href = whatsappUrl;
+      }, 3000);
     });
   </script>
 </body>
+
 </html>
